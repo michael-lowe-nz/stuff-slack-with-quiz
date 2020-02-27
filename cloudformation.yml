@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  SlackWebhookUrl:
+    Description: URL of Slack webhook to post to (e.g. 'https://hooks.slack.com/services/JSLFSKJ/L9234L/1NqsqqVMFCk')
+    Type: String
+Resources:
+  QuizScraperLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ScrapeQuiz'
+      Handler: 'index.handler'
+      Environment:
+        Variables:
+          "SLACK_HOOK_URL": !Ref SlackWebhookUrl
+      Code:
+        S3Bucket: 'nz.govt.education.webservices-public'
+        S3Key: 'lambda/quizScraper'
+      Description: !Sub 'This Lambda function will scrape the Stuff Quiz page for the most recent quiz'
+      Role: !GetAtt QuizScraperLambdaRole.Arn
+      Runtime: nodejs12.x
+  QuizScraperLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/service-role/"
+      Policies:
+      - PolicyName: !Sub 'QuizScraperLambdaExecutionRole'
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*'
+          - Effect: Allow
+            Action:
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+          - Effect: Allow
+            Action:
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/QuizScraper:*'
+  ScheduledRule:
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: 'Cloudwatch event that invokes the lambda script that posts to slack'
+      Name: 'InvokeQuizScraperLambda'
+      ScheduleExpression: cron(0 9,15 * * ? *)
+      Targets:
+        - Arn: !GetAtt QuizScraperLambda.Arn
+          Id: 'TargetFunctionV1'
+  PermissionForEventToInvokeLambda: 
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: 
+        Ref: "QuizScraperLambda"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: 
+        Fn::GetAtt: 
+          - "ScheduledRule"
+          - "Arn"
