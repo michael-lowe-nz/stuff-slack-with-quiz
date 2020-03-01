@@ -11,7 +11,7 @@ exports.handler = async (event, context, callback) => {
         const quizzes = $('.display-asset h3 a')
         const currentQuizUrl = quizzes.first().attr('href')
         const fullUrl = `${baseUrl}${currentQuizUrl}`
-        return await request.post(hookUrl, {text: fullUrl})
+        return request.post(hookUrl, {text: fullUrl})
         
     } catch(e) {
         throw e
