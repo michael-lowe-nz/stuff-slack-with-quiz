@@ -1,8 +1,11 @@
 const cheerio = require('cheerio')
 const request = require('axios')
 
+require('dotenv').config()
 const baseUrl = 'https://stuff.co.nz'
-const hookUrl = process.env.SLACK_HOOK_URL
+
+const { WebClient } = require('@slack/web-api')
+const web = new WebClient(process.env.TOKEN)
 
 exports.handler = async (event, context, callback) => {
     try {
@@ -11,9 +14,11 @@ exports.handler = async (event, context, callback) => {
         const quizzes = $('.display-asset h3 a')
         const currentQuizUrl = quizzes.first().attr('href')
         const fullUrl = `${baseUrl}${currentQuizUrl}`
-        return await request.post(hookUrl, {text: fullUrl})
-        
-    } catch(e) {
+        return await web.chat.postMessage({
+            channel: '#quiz-test',
+            text: fullUrl,
+        });
+    } catch (e) {
         throw e
     }
 }
