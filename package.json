@@ -4,10 +4,11 @@
   "description": "Calls a webhook with latest stuff quiz scraped from the quizzes page",
   "main": "index.js",
   "scripts": {
-    "zip-code": "zip -r deploy.zip ./quizScraper.js lib blocks ./node_modules",
+    "zip-code": "zip -r deploy.zip ./quizScraper.js ./quizPostHandler.js lib blocks ./node_modules",
     "update-deployment-bucket": "aws s3 cp deploy.zip s3://nz.govt.education.webservices-public/lambda/quizScraper",
     "zip-and-copy-to-update-bucket": "npm run zip-code && npm run update-deployment-bucket",
     "update-function-code": "npm run zip-code && aws lambda update-function-code --function-name 'webservices-slack-app-dev-QuizScraperLambda-1POEX69FDXI3J' --zip-file fileb://deploy.zip --publish",
+    "update-function-code:post-handler": "npm run zip-code && aws lambda update-function-code --function-name 'arn:aws:lambda:ap-southeast-2:454817366727:function:webservices-slack-app-dev-QuizPostHandlerLambda-1DC2E62X1D7DG' --zip-file fileb://deploy.zip --publish",
     "test": "node test.js",
     "update-cloudformation-stack:dev": "aws cloudformation deploy --template-file cloudformation.yml --stack-name webservices-slack-app-dev"
   },
