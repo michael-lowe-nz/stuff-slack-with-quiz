@@ -4,7 +4,7 @@
   "description": "Calls a webhook with latest stuff quiz scraped from the quizzes page",
   "main": "index.js",
   "scripts": {
-    "zip-code": "zip -r deploy.zip ./quizScraper.js lib ./node_modules",
+    "zip-code": "zip -r deploy.zip ./quizScraper.js lib blocks ./node_modules",
     "update-deployment-bucket": "aws s3 cp deploy.zip s3://nz.govt.education.webservices-public/lambda/quizScraper",
     "zip-and-copy-to-update-bucket": "npm run zip-code && npm run update-deployment-bucket",
     "update-function-code": "npm run zip-code && aws lambda update-function-code --function-name 'webservices-slack-app-dev-QuizScraperLambda-1POEX69FDXI3J' --zip-file fileb://deploy.zip --publish",
@@ -14,7 +14,6 @@
   "author": "Michael Lowe",
   "license": "ISC",
   "dependencies": {
-    "@slack/interactive-messages": "^1.4.1",
     "@slack/web-api": "^5.7.0",
     "axios": "^0.19.0",
     "cheerio": "^1.0.0-rc.3"

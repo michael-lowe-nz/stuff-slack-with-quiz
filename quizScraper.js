@@ -12,7 +12,7 @@ const maxScore = 15
 exports.handler = async (event, context, callback) => {
     try {
         const url = await getQuizUrl()
-        return await web.chat.postMessage({
+        return web.chat.postMessage({
             channel: '#quiz-test',
             text: url,
             blocks: quizBlock(url, maxScore)
