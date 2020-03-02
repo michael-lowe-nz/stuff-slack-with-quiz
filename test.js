@@ -1,3 +1,3 @@
-const { handler } = require('./index')
+const { handler } = require('./quizScraper')
 
 handler()
