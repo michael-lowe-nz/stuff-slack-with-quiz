@@ -1,23 +1,28 @@
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
-  SlackWebhookUrl:
-    Description: URL of Slack webhook to post to (e.g. 'https://hooks.slack.com/services/JSLFSKJ/L9234L/1NqsqqVMFCk')
+  Environment:
+    Type: String
+    AllowedValues:
+      - dev
+      - production
+  SlackToken:
+    Description: Slack OAuth Token
     Type: String
 Resources:
   QuizScraperLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub 'ScrapeQuiz'
-      Handler: 'index.handler'
+      Handler: 'quizScraper.handler'
       Environment:
         Variables:
-          "SLACK_HOOK_URL": !Ref SlackWebhookUrl
+          "SLACK_TOKEN": !Ref SlackToken
       Code:
         S3Bucket: 'nz.govt.education.webservices-public'
         S3Key: 'lambda/quizScraper'
       Description: !Sub 'This Lambda function will scrape the Stuff Quiz page for the most recent quiz'
       Role: !GetAtt QuizScraperLambdaRole.Arn
       Runtime: nodejs12.x
+      Timeout: 12
   QuizScraperLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -54,7 +59,6 @@ Resources:
     Type: AWS::Events::Rule
     Properties: 
       Description: 'Cloudwatch event that invokes the lambda script that posts to slack'
-      Name: 'InvokeQuizScraperLambda'
       ScheduleExpression: cron(2 2,20 * * ? *)
       Targets:
         - Arn: !GetAtt QuizScraperLambda.Arn
@@ -70,3 +74,24 @@ Resources:
         Fn::GetAtt: 
           - "ScheduledRule"
           - "Arn"
+  QuizScoresDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: 'ScoreId'
+        AttributeType: 'S'
+      - AttributeName: 'UserId'
+        AttributeType: 'S'
+      KeySchema:
+      - AttributeName: 'ScoreId'
+        KeyType: HASH
+      GlobalSecondaryIndexes:
+        -
+          IndexName: "user-index"
+          KeySchema:
+            - AttributeName: UserId
+              KeyType: HASH
+          Projection:
+            NonKeyAttributes: []
+            ProjectionType: "ALL"
