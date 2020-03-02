@@ -5,28 +5,28 @@ const emojiMap = {
 
 module.exports = (url, maxScore) => {
     const buttons = Array.from(Array(maxScore + 1)).map((item, index) => ({
-        "type": "button",
-        "text": {
-            "type": "plain_text",
-            "text": `${maxScore - index} ${emojiMap[maxScore - index] ? emojiMap[maxScore - index] : ''}`,
-            "emoji": true
+        type: "button",
+        text: {
+            type: "plain_text",
+            text: `${maxScore - index} ${emojiMap[maxScore - index] ? emojiMap[maxScore - index] : ''}`,
+            emoji: true
         },
-        "value": `${index}`
+        value: `${index}`
     }))
     return [
         {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": `*Kia Ora!*\n${url}\n*Please record your score below!*`
+            type: "section",
+            text: {
+                type: "mrkdwn",
+                text: `*Kia Ora!*\n${url}\n*Please record your score below!*`
             },
         },
         {
-            "type": "divider"
+            type: "divider"
         },
         {
-            "type": "actions",
-            "elements": buttons
+            type: "actions",
+            elements: buttons
         },
 
     ]
