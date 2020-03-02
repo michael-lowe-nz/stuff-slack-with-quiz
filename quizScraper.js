@@ -15,7 +15,7 @@ exports.handler = async (event, context, callback) => {
         return await web.chat.postMessage({
             channel: '#quiz-test',
             text: url,
-            blocks: quizBlock(url, 15)
+            blocks: quizBlock(url, maxScore)
         });
     } catch (e) {
         throw e
