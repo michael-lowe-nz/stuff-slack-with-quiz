@@ -23,6 +23,20 @@ Resources:
       Role: !GetAtt QuizScraperLambdaRole.Arn
       Runtime: nodejs12.x
       Timeout: 12
+  QuizPostHandlerLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: 'quizPostHandler.handler'
+      Environment:
+        Variables:
+          "SLACK_TOKEN": !Ref SlackToken
+      Code:
+        S3Bucket: 'nz.govt.education.webservices-public'
+        S3Key: 'lambda/quizScraper'
+      Description: !Sub 'This Lambda function will handle POST requests for quiz results'
+      Role: !GetAtt QuizScraperLambdaRole.Arn
+      Runtime: nodejs12.x
+      Timeout: 12
   QuizScraperLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -95,3 +109,42 @@ Resources:
           Projection:
             NonKeyAttributes: []
             ProjectionType: "ALL"
+  ApiGateway:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: "QuizPostHandlerApi"
+      Description: "API for the Web Services Slack App"
+  QuizPostHandlerLambdaApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt "QuizPostHandlerLambda.Arn"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/POST/"
+  ApiGatewayDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    DependsOn:
+      - "ApiGatewayRootMethod"
+    Properties:
+      RestApiId: !Ref "ApiGateway"
+      StageName: !Ref "Environment"
+  ApiGatewayRootMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+          - lambdaArn: !GetAtt "QuizPostHandlerLambda.Arn"
+      ResourceId: !GetAtt "ApiGateway.RootResourceId"
+      RestApiId: !Ref "ApiGateway"
+Outputs:
+  PostQuizResultsUrl:
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+  QuizScraperLambda:
+    Value: !GetAtt "QuizScraperLambda.Arn"
+  QuizPostHandlerLambda:
+    Value: !GetAtt "QuizPostHandlerLambda.Arn"
