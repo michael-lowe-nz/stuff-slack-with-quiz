@@ -1,4 +1,7 @@
 exports.handler = async (event, context, callback) => {
     console.log("event:", event)
-    return
+    return {
+        status: 201,
+        message: 'YO'
+    }
 }
