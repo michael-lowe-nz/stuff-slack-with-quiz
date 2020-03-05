@@ -6,7 +6,6 @@ const {
 
 test('getTime is a string', () => {
     const timeString = getTime()
-    console.log(timeString)
     expect(timeString).toStrictEqual(expect.anything())
 })
 
