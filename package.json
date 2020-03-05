@@ -9,7 +9,7 @@
     "zip-and-copy-to-update-bucket": "npm run zip-code && npm run update-deployment-bucket",
     "update-function-code": "npm run zip-code && aws lambda update-function-code --function-name 'webservices-slack-app-dev-QuizScraperLambda-1POEX69FDXI3J' --zip-file fileb://deploy.zip --publish",
     "update-function-code:post-handler": "npm run zip-code && aws lambda update-function-code --function-name 'arn:aws:lambda:ap-southeast-2:454817366727:function:webservices-slack-app-dev-QuizPostHandlerLambda-1DC2E62X1D7DG' --zip-file fileb://deploy.zip --publish",
-    "test": "node test.js",
+    "test": "jest",
     "update-cloudformation-stack:dev": "aws cloudformation deploy --template-file cloudformation.yml --stack-name webservices-slack-app-dev"
   },
   "author": "Michael Lowe",
@@ -20,6 +20,7 @@
     "cheerio": "^1.0.0-rc.3"
   },
   "devDependencies": {
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "jest": "^25.1.0"
   }
 }
