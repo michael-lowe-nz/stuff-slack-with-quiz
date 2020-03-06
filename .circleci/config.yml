@@ -3,7 +3,7 @@ orbs:
   node: circleci/node@1.1.6
   aws-cli: circleci/aws-cli@0.1.13
 jobs:
-  build-and-test:
+  test:
     executor:
       name: node/default
     steps:
@@ -12,7 +12,7 @@ jobs:
           steps:
             - run: npm install
             - run: npm test
-  build-and-deploy:
+  deploy:
     executor:
       name: node/default
     steps:
@@ -23,14 +23,10 @@ jobs:
             # - run: npm run deploy
             - run: echo "Success"
 workflows:
-    build-and-test:
+    build-test-deploy:
       jobs:
-        - build-and-test
-    deploy:
-      jobs:
-        - build-and-deploy:
-              requires:
-                - build-and-test
+        - test
+        - deploy:
               filters:
                 branches:
                   only: master
