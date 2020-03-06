@@ -40,6 +40,7 @@ const main = async () => {
         console.log("Updated functions!!")
     } catch (e) {
         console.log(e)
+        process.exit(1);
     }
 }
 
