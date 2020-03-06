@@ -143,12 +143,49 @@ Resources:
       RestApiId: !Ref "ApiGateway"
   DeploymentBucket:
     Type: "AWS::S3::Bucket"
+  DeploymentUser:
+    Type: "AWS::IAM::User"
+    Properties:
+      Policies:
+        - PolicyName: "delpoy-serverless-slack-app"
+          PolicyDocument: {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:PutObject",
+                        "s3:GetObject",
+                        "s3:DeleteObject"
+                    ],
+                    "Resource": !Sub "${DeploymentBucket.Arn}/*"
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:ListBucket",
+                    ],
+                    "Resource": !Sub "${DeploymentBucket.Arn}"
+                }
+            ]
+        }
+  DeployUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      Status: 'Active'
+      UserName: !Ref DeploymentUser
 Outputs:
   PostQuizResultsUrl:
     Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
   QuizScraperLambda:
-    Value: !GetAtt "QuizScraperLambda.Arn"
+    Value: !GetAtt QuizScraperLambda.Arn
   QuizPostHandlerLambda:
-    Value: !GetAtt "QuizPostHandlerLambda.Arn"
+    Value: !GetAtt QuizPostHandlerLambda.Arn
   DeploymentBucket:
-    Value: !Ref "DeploymentBucket"
+    Value: !Ref DeploymentBucket
+  DeployAccessKey:
+    Description: Access Key for deploy user
+    Value: !Ref DeployUserAccessKey
+  DeploySecretAccessKey:
+    Description: Secret Access Key for deploy user
+    Value: !GetAtt DeployUserAccessKey.SecretAccessKey
