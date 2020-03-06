@@ -141,6 +141,8 @@ Resources:
           - lambdaArn: !GetAtt "QuizPostHandlerLambda.Arn"
       ResourceId: !GetAtt "ApiGateway.RootResourceId"
       RestApiId: !Ref "ApiGateway"
+  DeploymentBucket:
+    Type: "AWS::S3::Bucket"
 Outputs:
   PostQuizResultsUrl:
     Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
@@ -148,3 +150,5 @@ Outputs:
     Value: !GetAtt "QuizScraperLambda.Arn"
   QuizPostHandlerLambda:
     Value: !GetAtt "QuizPostHandlerLambda.Arn"
+  DeploymentBucket:
+    Value: !Ref "DeploymentBucket"
