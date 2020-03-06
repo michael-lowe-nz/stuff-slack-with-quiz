@@ -166,6 +166,16 @@ Resources:
                         "s3:ListBucket",
                     ],
                     "Resource": !Sub "${DeploymentBucket.Arn}"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:UpdateFunctionCode"
+                  ],
+                  "Resource": [
+                    !GetAtt QuizScraperLambda.Arn,
+                    !GetAtt QuizPostHandlerLambda.Arn,
+                  ]
                 }
             ]
         }
