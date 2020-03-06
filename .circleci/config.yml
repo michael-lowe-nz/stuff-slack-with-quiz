@@ -31,7 +31,6 @@ workflows:
               requires:
                 - test
         - deploy:
-              context: aws
               requires:
                 - hold
               filters:
