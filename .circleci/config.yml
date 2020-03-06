@@ -30,16 +30,17 @@ workflows:
     build-test-deploy:
       jobs:
         - test
-        - hold:
-              type: approval
-              requires:
-                - test
-              filters:
-                branches:
-                  only: master
+        # - hold:
+        #       type: approval
+        #       requires:
+        #         - test
+        #       filters:
+        #         branches:
+        #           only: master
         - deploy:
               requires:
-                - hold
+                # - hold
+                - test
               filters:
                 branches:
                   only: master
