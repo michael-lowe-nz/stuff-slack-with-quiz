@@ -6,7 +6,8 @@
   "scripts": {
     "zip-code": "zip -r deploy.zip ./quizScraper.js ./quizPostHandler.js lib blocks ./node_modules -x 'node_modules/aws-sdk/*'",
     "deploy": "npm run zip-code && node ./deploy.js",
-    "test": "jest"
+    "test": "jest",
+    "test:ci": "jest --collectCoverage=true"
   },
   "author": "Michael Lowe",
   "license": "ISC",
