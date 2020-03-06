@@ -26,9 +26,13 @@ workflows:
     build-test-deploy:
       jobs:
         - test
+        - hold:
+          type: approval
+          requires:
+           - test
         - deploy:
               requires:
-                - test
+                - hold
               filters:
                 branches:
                   only: master
