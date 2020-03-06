@@ -4,8 +4,26 @@ This is the slack app for all web services carry on, tom-foolery, and jiggery po
 
 ## To do
 
-1. Migrate to a new slack app called MOE Web Services
-2. New Cloudformation Stack with a new name
-3. Deploy in CI, AWS SAM?
-4. Serverless Framework?
-5. Testing?
+1. New Cloudformation Stack with a new name
+2. Deploy in CI, AWS SAM?
+3. Serverless Framework?
+
+## Run
+
+```bash
+npm install
+```
+
+## Test
+
+```bash
+npm test
+```
+
+## Deploy
+
+```bash
+npm run update-function-code && update-function-code:post-handler
+```
+
+##
