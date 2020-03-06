@@ -1,4 +1,5 @@
 # Web Services Slack
+[![CircleCI](https://circleci.com/gh/michael-lowe-nz/stuff-slack-with-quiz.svg?style=svg)](https://circleci.com/gh/michael-lowe-nz/stuff-slack-with-quiz)
 
 This is the slack app for all web services carry on, tom-foolery, and jiggery pokery.
 
