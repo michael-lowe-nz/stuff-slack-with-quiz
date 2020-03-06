@@ -41,16 +41,6 @@ const main = async () => {
     } catch (e) {
         console.log(e)
     }
-
-
-
 }
-// Upload to a bucket
-
-// Update function code for quizScraper
-
-// Update function code for postHandler
-
-// Update cloudformation?
 
 main()
