@@ -29,9 +29,9 @@ workflows:
     deploy:
       jobs:
         - build-and-test
-        - build-and-deploy
-          requires:
-            - build-and-test
-          filters:
-            branches:
-              only: release
+        - build-and-deploy:
+              requires:
+                - build-and-test
+              filters:
+                branches:
+                  only: release
