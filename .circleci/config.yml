@@ -1,0 +1,46 @@
+version: 2.1
+orbs:
+  node: circleci/node@1.1.6
+  # aws-cli: circleci/aws-cli@0.1.21
+jobs:
+  test:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: npm install
+            - run: npm run test:ci
+            - store_artifacts:
+                  path: coverage
+            - store_test_results:
+                  path: coverage
+  deploy:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: npm install
+            - run: npm run deploy
+            - run: echo "Success"
+workflows:
+    build-test-deploy:
+      jobs:
+        - test
+        # - hold:
+        #       type: approval
+        #       requires:
+        #         - test
+        #       filters:
+        #         branches:
+        #           only: master
+        - deploy:
+              requires:
+                # - hold
+                - test
+              filters:
+                branches:
+                  only: master
