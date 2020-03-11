@@ -32,7 +32,7 @@ exports.handler = async (event, context, callback) => {
         }
 
         return web.chat.postMessage({
-            channel: '#quiz-test',
+            channel: `#${process.env.SLACK_CHANNEL}`,
             text: url,
             blocks: quizBlock(url, maxScore)
         });

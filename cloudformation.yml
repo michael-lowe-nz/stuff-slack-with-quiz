@@ -8,6 +8,9 @@ Parameters:
   SlackToken:
     Description: Slack OAuth Token
     Type: String
+  SlackChannel:
+    Description: Slack channel that the action will happen in, e.g. 'quiz'
+    Type: String
 Resources:
   QuizScraperLambda:
     Type: AWS::Lambda::Function
@@ -16,6 +19,7 @@ Resources:
       Environment:
         Variables:
           "SLACK_TOKEN": !Ref SlackToken
+          "SLACK_CHANNEL": !Ref SlackChannel
       Code:
         S3Bucket: 'nz.govt.education.webservices-public'
         S3Key: 'lambda/quizScraper'
@@ -73,7 +77,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties: 
       Description: 'Cloudwatch event that invokes the lambda script that posts to slack'
-      ScheduleExpression: cron(2 2,20 * * ? *)
+      ScheduleExpression: cron(2 2,19 * * ? *)
       Targets:
         - Arn: !GetAtt QuizScraperLambda.Arn
           Id: 'TargetFunctionV1'
