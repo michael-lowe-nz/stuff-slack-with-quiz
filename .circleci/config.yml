@@ -20,7 +20,7 @@ jobs:
             - store_test_results:
                   path: coverage
             - store_test_results:
-                  path: reports/junit
+                  path: ./junit.xml
   deploy:
     executor:
       name: node/default
