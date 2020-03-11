@@ -20,21 +20,23 @@ const maxScore = 15
 exports.handler = async (event, context, callback) => {
     try {
         const url = await getQuizUrl()
-        const timeString = new Date().toLocaleString({timeZone: "Pacific/Auckland"})
 
-        /** Afternoon Quiz */
-        if(isMorning(getTime())) {
-            console.log('Morning Quiz')
+        let isCorrectQuiz = false
+        let type
+
+        if(isMorning(getTime()) && quizIsMorning(url)) {
+            isCorrectQuiz = true
+            type = 'Morning'
         }
 
-        if(isAfternoon(getTime())) {
-            console.log('Afternoon Quiz')
+        if(isAfternoon(getTime()) && quizIsAfternoon(url)) {
+            isCorrectQuiz = true
+            type = 'Afternoon'
         }
 
         return web.chat.postMessage({
             channel: `#${process.env.SLACK_CHANNEL}`,
-            text: url,
-            blocks: quizBlock(url, maxScore)
+            blocks: quizBlock(url, maxScore, isCorrectQuiz, type)
         });
     } catch (e) {
         throw e
