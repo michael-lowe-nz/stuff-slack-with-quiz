@@ -31,7 +31,6 @@ jobs:
           steps:
             - run: npm install
             - run: npm run deploy
-            - run: echo "Success"
 workflows:
     build-test-deploy:
       jobs:
