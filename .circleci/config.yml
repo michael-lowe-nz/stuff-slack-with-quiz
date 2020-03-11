@@ -1,7 +1,6 @@
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
-  # aws-cli: circleci/aws-cli@0.1.21
 jobs:
   test:
     executor:
@@ -36,16 +35,8 @@ workflows:
     build-test-deploy:
       jobs:
         - test
-        # - hold:
-        #       type: approval
-        #       requires:
-        #         - test
-        #       filters:
-        #         branches:
-        #           only: master
         - deploy:
               requires:
-                # - hold
                 - test
               filters:
                 branches:
