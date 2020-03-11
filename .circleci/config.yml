@@ -11,13 +11,17 @@ jobs:
       - node/with-cache:
           steps:
             - run: npm install
-            - run: npm run test:ci
+            - run:
+                name: Run Jest tests
+                command: npm run test:ci
+                environment:
+                  JEST_JUNIT_OUTPUT: "reports/junit/js-test-results.xml"
             - store_artifacts:
                   path: coverage
             - store_test_results:
                   path: coverage
             - store_test_results:
-                  path: junit.xml
+                  path: reports/junit
   deploy:
     executor:
       name: node/default
