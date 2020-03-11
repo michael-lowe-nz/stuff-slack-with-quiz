@@ -1,7 +1,6 @@
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
-  # aws-cli: circleci/aws-cli@0.1.21
 jobs:
   test:
     executor:
@@ -15,7 +14,8 @@ jobs:
                 name: Run Jest tests
                 command: npm run test:ci
                 environment:
-                  JEST_JUNIT_OUTPUT: "reports/junit/js-test-results.xml"
+                  JEST_JUNIT_OUTPUT_DIR: "reports/junit"
+                  JEST_JUNIT_OUTPUT_NAME: "js-test-results.xml"
             - store_artifacts:
                   path: coverage
             - store_test_results:
@@ -36,16 +36,8 @@ workflows:
     build-test-deploy:
       jobs:
         - test
-        # - hold:
-        #       type: approval
-        #       requires:
-        #         - test
-        #       filters:
-        #         branches:
-        #           only: master
         - deploy:
               requires:
-                # - hold
                 - test
               filters:
                 branches:
