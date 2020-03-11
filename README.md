@@ -3,13 +3,11 @@
 
 This is the slack app for all web services carry on, tom-foolery, and jiggery pokery.
 
-## To do
-
-1. New Cloudformation Stack with a new name
-2. Deploy in CI, AWS SAM?
-3. Serverless Framework?
-
 ## Run
+
+You'll need access to an AWS account
+
+Visit https://ap-southeast-2.console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/create/template and create a stack using the `cloudformation.yml` template contained in this repository.
 
 ```bash
 npm install
