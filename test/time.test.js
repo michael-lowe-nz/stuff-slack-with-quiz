@@ -9,7 +9,7 @@ test('getTime is a string', () => {
     expect(timeString).toStrictEqual(expect.anything())
 })
 
-test.only('isAfternoon returns true when passed 3:00pm', () => {
+test('isAfternoon returns true when passed 3:00pm', () => {
     const timeString = "2020-3-5 15:00:00"
     const time = getAmOrPm(timeString)
     console.log(time)
