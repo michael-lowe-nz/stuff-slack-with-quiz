@@ -7,7 +7,7 @@ const quizIsMorning = require('./lib/quizIsMorning')
 const quizIsAfternoon = require('./lib/quizIsAfternoon')
 const quizBlock =  require('./blocks/quiz')
 const {
-    getTime,
+    getAmOrPm,
     isAfternoon,
     isMorning
 } = require('./lib/time')
@@ -23,13 +23,18 @@ exports.handler = async (event, context, callback) => {
 
         let isCorrectQuiz = false
         let type
+        const time = getAmOrPm()
+        
+        console.log('Time: ', time)
+        console.log('Is morning?: ', isMorning(time))
+        console.log('Is afternoon?: ', isAfternoon(time))
 
-        if(isMorning(getTime()) && quizIsMorning(url)) {
+        if(isMorning(time) && quizIsMorning(url)) {
             isCorrectQuiz = true
             type = 'Morning'
         }
 
-        if(isAfternoon(getTime()) && quizIsAfternoon(url)) {
+        if(isAfternoon(time) && quizIsAfternoon(url)) {
             isCorrectQuiz = true
             type = 'Afternoon'
         }
