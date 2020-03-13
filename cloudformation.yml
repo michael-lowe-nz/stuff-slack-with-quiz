@@ -188,6 +188,8 @@ Resources:
     Properties:
       Status: 'Active'
       UserName: !Ref DeploymentUser
+  QuizEventQueue:
+    Type: AWS::SQS::Queue
 Outputs:
   PostQuizResultsUrl:
     Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
