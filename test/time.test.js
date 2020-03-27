@@ -12,7 +12,6 @@ test('getTime is a string', () => {
 test('isAfternoon returns true when passed 3:00pm', () => {
     const timeString = "2020-3-5 15:00:00"
     const time = getAmOrPm(timeString)
-    console.log(time)
     expect(isAfternoon(time)).toBe(true)
 })
 
