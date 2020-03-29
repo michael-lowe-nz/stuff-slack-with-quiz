@@ -15,7 +15,7 @@ Resources:
   QuizScraperLambda:
     Type: AWS::Lambda::Function
     Properties:
-      Handler: 'quizScraper.handler'
+      Handler: 'features/quizScraper.handler'
       Environment:
         Variables:
           "SLACK_TOKEN": !Ref SlackToken
@@ -30,7 +30,7 @@ Resources:
   QuizPostHandlerLambda:
     Type: AWS::Lambda::Function
     Properties:
-      Handler: 'quizPostHandler.handler'
+      Handler: 'features/quizPostHandler.handler'
       Environment:
         Variables:
           "SLACK_TOKEN": !Ref SlackToken
