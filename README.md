@@ -28,6 +28,7 @@ npm run update-function-code && update-function-code:post-handler
 
 ## Todo
 
+* Translate to AWS SAM
 * Handle if quiz is not there. If it is the afternoon, and a new afternoon quiz is not ready, then it should put a message in the dead letter queue, it should hide this message for 10 minutes, it should also make note of which number attempt it was.
 * Buttons to select your score, will be stored in a dynamoDB table.
 
