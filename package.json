@@ -4,7 +4,7 @@
   "description": "Calls a webhook with latest stuff quiz scraped from the quizzes page",
   "main": "index.js",
   "scripts": {
-    "zip-code": "zip -r deploy.zip ./quizScraper.js ./quizPostHandler.js lib blocks ./node_modules -x 'node_modules/aws-sdk/*'",
+    "zip-code": "zip -r deploy.zip ./features lib blocks ./node_modules -x 'node_modules/aws-sdk/*'",
     "deploy": "npm run zip-code && node ./deploy.js",
     "test": "jest",
     "test:ci": "jest --ci --runInBand --reporters=default --reporters=jest-junit --collectCoverage=true",
