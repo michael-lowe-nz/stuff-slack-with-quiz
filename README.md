@@ -29,3 +29,8 @@ npm run update-function-code && update-function-code:post-handler
 
 * Handle if quiz is not there. If it is the afternoon, and a new afternoon quiz is not ready, then it should put a message in the dead letter queue, it should hide this message for 10 minutes, it should also make note of which number attempt it was.
 * Buttons to select your score, will be stored in a dynamoDB table.
+
+## How and Why?
+
+I've chosen to do this with pure cloudformation, and custom deploy scripts as a learning experiment.
+I could do it with something like https://serverless.com or https://begin.com, however it would provide too much magic at the moment, and I want to increase my understanding of the details of serverless architecture.
