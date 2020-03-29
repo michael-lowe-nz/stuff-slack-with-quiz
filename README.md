@@ -5,13 +5,14 @@ This is the slack app for all web services carry on, tom-foolery, and jiggery po
 
 ## Run
 
-You'll need access to an AWS account
-
-Visit https://ap-southeast-2.console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/create/template and create a stack using the `cloudformation.yml` template contained in this repository.
-
+1. Clone down this repo
 ```bash
-npm install
+git clone https://github.com/michael-lowe-nz/stuff-slack-with-quiz
+cd stuff-slack-with-quiz
 ```
+2. AWS SAM
+Now, you'll need to install the AWS SAM cli:
+https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html
 
 ## Test
 

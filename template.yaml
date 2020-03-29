@@ -13,197 +13,205 @@ Parameters:
   SlackChannel:
     Description: Slack channel that the action will happen in, e.g. 'quiz'
     Type: String
+Globals:
+  Function:
+    Timeout: 12
 Resources:
   QuizScraperLambda:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: 'features/quizScraper.handler'
+      Handler: 'quizScraper.handler'
+      CodeUri: features/quizScraper/
       Environment:
         Variables:
           "SLACK_TOKEN": !Ref SlackToken
           "SLACK_CHANNEL": !Ref SlackChannel
-      Code:
-        S3Bucket: 'nz.govt.education.webservices-public'
-        S3Key: 'lambda/quizScraper'
       Description: !Sub 'This Lambda function will scrape the Stuff Quiz page for the most recent quiz'
       Role: !GetAtt QuizScraperLambdaRole.Arn
       Runtime: nodejs12.x
-      Timeout: 12
-  QuizPostHandlerLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: 'features/quizPostHandler.handler'
-      Environment:
-        Variables:
-          "SLACK_TOKEN": !Ref SlackToken
-      Code:
-        S3Bucket: 'nz.govt.education.webservices-public'
-        S3Key: 'lambda/quizScraper'
-      Description: !Sub 'This Lambda function will handle POST requests for quiz results'
-      Role: !GetAtt QuizScraperLambdaRole.Arn
-      Runtime: nodejs12.x
-      Timeout: 12
-  QuizScraperLambdaRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-          Action:
-          - sts:AssumeRole
-      Path: "/service-role/"
-      Policies:
-      - PolicyName: !Sub 'QuizScraperLambdaExecutionRole'
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
-            - logs:CreateLogGroup
-            Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*'
-          - Effect: Allow
-            Action:
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
-          - Effect: Allow
-            Action:
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-            Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/QuizScraper:*'
-  ScheduledRule:
-    Type: AWS::Events::Rule
-    Properties: 
-      Description: 'Cloudwatch event that invokes the lambda script that posts to slack'
-      ScheduleExpression: cron(2 2,19 * * ? *)
-      Targets:
-        - Arn: !GetAtt QuizScraperLambda.Arn
-          Id: 'TargetFunctionV1'
-  PermissionForEventToInvokeLambda: 
-    Type: AWS::Lambda::Permission
-    Properties: 
-      FunctionName: 
-        Ref: "QuizScraperLambda"
-      Action: "lambda:InvokeFunction"
-      Principal: "events.amazonaws.com"
-      SourceArn: 
-        Fn::GetAtt: 
-          - "ScheduledRule"
-          - "Arn"
-  QuizScoresDynamoDBTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-      - AttributeName: 'ScoreId'
-        AttributeType: 'S'
-      - AttributeName: 'UserId'
-        AttributeType: 'S'
-      KeySchema:
-      - AttributeName: 'ScoreId'
-        KeyType: HASH
-      GlobalSecondaryIndexes:
-        -
-          IndexName: "user-index"
-          KeySchema:
-            - AttributeName: UserId
-              KeyType: HASH
-          Projection:
-            NonKeyAttributes: []
-            ProjectionType: "ALL"
-  ApiGateway:
-    Type: "AWS::ApiGateway::RestApi"
-    Properties:
-      Name: "QuizPostHandlerApi"
-      Description: "API for the Web Services Slack App"
-  QuizPostHandlerLambdaApiGatewayInvoke:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      Action: "lambda:InvokeFunction"
-      FunctionName: !GetAtt "QuizPostHandlerLambda.Arn"
-      Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/POST/"
-  ApiGatewayDeployment:
-    Type: "AWS::ApiGateway::Deployment"
-    DependsOn:
-      - "ApiGatewayRootMethod"
-    Properties:
-      RestApiId: !Ref "ApiGateway"
-      StageName: !Ref "Environment"
-  ApiGatewayRootMethod:
-    Type: "AWS::ApiGateway::Method"
-    Properties:
-      AuthorizationType: "NONE"
-      HttpMethod: "POST"
-      Integration:
-        IntegrationHttpMethod: "POST"
-        Type: "AWS_PROXY"
-        Uri: !Sub
-          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
-          - lambdaArn: !GetAtt "QuizPostHandlerLambda.Arn"
-      ResourceId: !GetAtt "ApiGateway.RootResourceId"
-      RestApiId: !Ref "ApiGateway"
-  DeploymentBucket:
-    Type: "AWS::S3::Bucket"
-  DeploymentUser:
-    Type: "AWS::IAM::User"
-    Properties:
-      Policies:
-        - PolicyName: "delpoy-serverless-slack-app"
-          PolicyDocument: {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Effect": "Allow",
-                    "Action": [
-                        "s3:PutObject",
-                        "s3:GetObject",
-                        "s3:DeleteObject"
-                    ],
-                    "Resource": !Sub "${DeploymentBucket.Arn}/*"
-                },
-                {
-                    "Effect": "Allow",
-                    "Action": [
-                        "s3:ListBucket",
-                    ],
-                    "Resource": !Sub "${DeploymentBucket.Arn}"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "lambda:UpdateFunctionCode"
-                  ],
-                  "Resource": [
-                    !GetAtt QuizScraperLambda.Arn,
-                    !GetAtt QuizPostHandlerLambda.Arn,
-                  ]
-                }
-            ]
-        }
-  DeployUserAccessKey:
-    Type: AWS::IAM::AccessKey
-    Properties:
-      Status: 'Active'
-      UserName: !Ref DeploymentUser
-  QuizEventQueue:
-    Type: AWS::SQS::Queue
+      Events:
+        CWScheduled:
+          Type: Schedule
+          Properites:
+            Schedule: cron(2 2,19 * * ? *)
+            Name: Morning and Afternoon Quiz Schedule
+            Description: Runs at 8:00am and 2:00pm NZ time
+            Enabled: true
+  # QuizPostHandlerLambda:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     Handler: 'features/quizPostHandler.handler'
+  #     Environment:
+  #       Variables:
+  #         "SLACK_TOKEN": !Ref SlackToken
+  #     Code:
+  #       S3Bucket: 'nz.govt.education.webservices-public'
+  #       S3Key: 'lambda/quizScraper'
+  #     Description: !Sub 'This Lambda function will handle POST requests for quiz results'
+  #     Role: !GetAtt QuizScraperLambdaRole.Arn
+  #     Runtime: nodejs12.x
+  #     Timeout: 12
+  # QuizScraperLambdaRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #       - Effect: Allow
+  #         Principal:
+  #           Service:
+  #           - lambda.amazonaws.com
+  #         Action:
+  #         - sts:AssumeRole
+  #     Path: "/service-role/"
+  #     Policies:
+  #     - PolicyName: !Sub 'QuizScraperLambdaExecutionRole'
+  #       PolicyDocument:
+  #         Version: '2012-10-17'
+  #         Statement:
+  #         - Effect: Allow
+  #           Action:
+  #           - logs:CreateLogGroup
+  #           Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*'
+  #         - Effect: Allow
+  #           Action:
+  #           - logs:CreateLogStream
+  #           - logs:PutLogEvents
+  #           Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+  #         - Effect: Allow
+  #           Action:
+  #           - logs:CreateLogStream
+  #           - logs:PutLogEvents
+  #           Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/QuizScraper:*'
+  # ScheduledRule:
+  #   Type: AWS::Events::Rule
+  #   Properties: 
+  #     Description: 'Cloudwatch event that invokes the lambda script that posts to slack'
+  #     ScheduleExpression: cron(2 2,19 * * ? *)
+  #     Targets:
+  #       - Arn: !GetAtt QuizScraperLambda.Arn
+  #         Id: 'TargetFunctionV1'
+  # PermissionForEventToInvokeLambda: 
+  #   Type: AWS::Lambda::Permission
+  #   Properties: 
+  #     FunctionName: 
+  #       Ref: "QuizScraperLambda"
+  #     Action: "lambda:InvokeFunction"
+  #     Principal: "events.amazonaws.com"
+  #     SourceArn: 
+  #       Fn::GetAtt: 
+  #         - "ScheduledRule"
+  #         - "Arn"
+  # QuizScoresDynamoDBTable:
+  #   Type: AWS::DynamoDB::Table
+  #   Properties:
+  #     BillingMode: PAY_PER_REQUEST
+  #     AttributeDefinitions:
+  #     - AttributeName: 'ScoreId'
+  #       AttributeType: 'S'
+  #     - AttributeName: 'UserId'
+  #       AttributeType: 'S'
+  #     KeySchema:
+  #     - AttributeName: 'ScoreId'
+  #       KeyType: HASH
+  #     GlobalSecondaryIndexes:
+  #       -
+  #         IndexName: "user-index"
+  #         KeySchema:
+  #           - AttributeName: UserId
+  #             KeyType: HASH
+  #         Projection:
+  #           NonKeyAttributes: []
+  #           ProjectionType: "ALL"
+  # ApiGateway:
+  #   Type: "AWS::ApiGateway::RestApi"
+  #   Properties:
+  #     Name: "QuizPostHandlerApi"
+  #     Description: "API for the Web Services Slack App"
+  # QuizPostHandlerLambdaApiGatewayInvoke:
+  #   Type: "AWS::Lambda::Permission"
+  #   Properties:
+  #     Action: "lambda:InvokeFunction"
+  #     FunctionName: !GetAtt "QuizPostHandlerLambda.Arn"
+  #     Principal: "apigateway.amazonaws.com"
+  #     SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/POST/"
+  # ApiGatewayDeployment:
+  #   Type: "AWS::ApiGateway::Deployment"
+  #   DependsOn:
+  #     - "ApiGatewayRootMethod"
+  #   Properties:
+  #     RestApiId: !Ref "ApiGateway"
+  #     StageName: !Ref "Environment"
+  # ApiGatewayRootMethod:
+  #   Type: "AWS::ApiGateway::Method"
+  #   Properties:
+  #     AuthorizationType: "NONE"
+  #     HttpMethod: "POST"
+  #     Integration:
+  #       IntegrationHttpMethod: "POST"
+  #       Type: "AWS_PROXY"
+  #       Uri: !Sub
+  #         - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+  #         - lambdaArn: !GetAtt "QuizPostHandlerLambda.Arn"
+  #     ResourceId: !GetAtt "ApiGateway.RootResourceId"
+  #     RestApiId: !Ref "ApiGateway"
+  # DeploymentBucket:
+  #   Type: "AWS::S3::Bucket"
+  # DeploymentUser:
+  #   Type: "AWS::IAM::User"
+  #   Properties:
+  #     Policies:
+  #       - PolicyName: "delpoy-serverless-slack-app"
+  #         PolicyDocument: {
+  #           "Version": "2012-10-17",
+  #           "Statement": [
+  #               {
+  #                   "Effect": "Allow",
+  #                   "Action": [
+  #                       "s3:PutObject",
+  #                       "s3:GetObject",
+  #                       "s3:DeleteObject"
+  #                   ],
+  #                   "Resource": !Sub "${DeploymentBucket.Arn}/*"
+  #               },
+  #               {
+  #                   "Effect": "Allow",
+  #                   "Action": [
+  #                       "s3:ListBucket",
+  #                   ],
+  #                   "Resource": !Sub "${DeploymentBucket.Arn}"
+  #               },
+  #               {
+  #                 "Effect": "Allow",
+  #                 "Action": [
+  #                   "lambda:UpdateFunctionCode"
+  #                 ],
+  #                 "Resource": [
+  #                   !GetAtt QuizScraperLambda.Arn,
+  #                   !GetAtt QuizPostHandlerLambda.Arn,
+  #                 ]
+  #               }
+  #           ]
+  #       }
+  # DeployUserAccessKey:
+  #   Type: AWS::IAM::AccessKey
+  #   Properties:
+  #     Status: 'Active'
+  #     UserName: !Ref DeploymentUser
+  # QuizEventQueue:
+  #   Type: AWS::SQS::Queue
 Outputs:
-  PostQuizResultsUrl:
-    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
-  QuizScraperLambda:
-    Value: !GetAtt QuizScraperLambda.Arn
-  QuizPostHandlerLambda:
-    Value: !GetAtt QuizPostHandlerLambda.Arn
-  DeploymentBucket:
-    Value: !Ref DeploymentBucket
-  DeployAccessKey:
-    Description: Access Key for deploy user
-    Value: !Ref DeployUserAccessKey
-  DeploySecretAccessKey:
-    Description: Secret Access Key for deploy user
-    Value: !GetAtt DeployUserAccessKey.SecretAccessKey
+  # PostQuizResultsUrl:
+  #   Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+  # QuizScraperLambda:
+  #   Value: !GetAtt QuizScraperLambda.Arn
+  # QuizPostHandlerLambda:
+  #   Value: !GetAtt QuizPostHandlerLambda.Arn
+  # DeploymentBucket:
+  #   Value: !Ref DeploymentBucket
+  # DeployAccessKey:
+  #   Description: Access Key for deploy user
+  #   Value: !Ref DeployUserAccessKey
+  # DeploySecretAccessKey:
+  #   Description: Secret Access Key for deploy user
+  #   Value: !GetAtt DeployUserAccessKey.SecretAccessKey

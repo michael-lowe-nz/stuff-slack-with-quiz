@@ -2,15 +2,15 @@ const { WebClient } = require('@slack/web-api')
 
 require('dotenv').config()
 
-const getQuizUrl = require('../lib/getQuizUrl')
-const quizIsMorning = require('../lib/quizIsMorning')
-const quizIsAfternoon = require('../lib/quizIsAfternoon')
-const quizBlock =  require('../blocks/quiz')
+const getQuizUrl = require('./lib/getQuizUrl')
+const quizIsMorning = require('./lib/quizIsMorning')
+const quizIsAfternoon = require('./lib/quizIsAfternoon')
+const quizBlock =  require('./blocks/quiz')
 const {
     getAmOrPm,
     isAfternoon,
     isMorning
-} = require('../lib/time')
+} = require('./lib/time')
 
 const web = new WebClient(process.env.SLACK_TOKEN)
 
