@@ -26,15 +26,13 @@ Resources:
         Variables:
           "SLACK_TOKEN": !Ref SlackToken
           "SLACK_CHANNEL": !Ref SlackChannel
-      Description: !Sub 'This Lambda function will scrape the Stuff Quiz page for the most recent quiz'
-      Role: !GetAtt QuizScraperLambdaRole.Arn
+      Description: 'This Lambda function will scrape the Stuff Quiz page for the most recent quiz'
       Runtime: nodejs12.x
       Events:
         CWScheduled:
           Type: Schedule
-          Properites:
+          Properties:
             Schedule: cron(2 2,19 * * ? *)
-            Name: Morning and Afternoon Quiz Schedule
             Description: Runs at 8:00am and 2:00pm NZ time
             Enabled: true
   # QuizPostHandlerLambda:
@@ -200,7 +198,7 @@ Resources:
   #     UserName: !Ref DeploymentUser
   # QuizEventQueue:
   #   Type: AWS::SQS::Queue
-Outputs:
+# Outputs:
   # PostQuizResultsUrl:
   #   Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
   # QuizScraperLambda:
