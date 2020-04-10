@@ -77,7 +77,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties: 
       Description: 'Cloudwatch event that invokes the lambda script that posts to slack'
-      ScheduleExpression: cron(2 2,19 * * ? *)
+      ScheduleExpression: cron(2 3,19 * * ? *)
       Targets:
         - Arn: !GetAtt QuizScraperLambda.Arn
           Id: 'TargetFunctionV1'
