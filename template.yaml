@@ -32,7 +32,7 @@ Resources:
         CWScheduled:
           Type: Schedule
           Properties:
-            Schedule: cron(2 2,19 * * ? *)
+            Schedule: cron(2 3,19 * * ? *)
             Description: Runs at 8:00am and 2:00pm NZ time
             Enabled: true
   # QuizPostHandlerLambda:
