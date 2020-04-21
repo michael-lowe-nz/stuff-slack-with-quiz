@@ -33,6 +33,10 @@ Resources:
           Type: SQS
           Properties:
             Queue: !GetAtt ScrapeQuizQueue.Arn
+        FailedQuizScrapeQueue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt FailedQuizScrapeQueue.Arn
   QuizResults:
     Type: AWS::Serverless::SimpleTable
   ScrapeQuizQueue:
@@ -47,8 +51,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties: 
       Description: 'Cloudwatch event that invokes the lambda script that posts to slack'
-      # ScheduleExpression: cron(2 3,19 * * ? *)
-      ScheduleExpression: rate(2 minutes)
+      ScheduleExpression: cron(2 * * * ? *)
       Targets:
         - Arn: !GetAtt ScrapeQuizQueue.Arn
           Id: 'TargetFunctionV1'
